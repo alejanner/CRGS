@@ -1,0 +1,20 @@
+#!/bin/bash
+
+GSEA_CLI_PATH="${GSEA_CLI_PATH:-/path/to/default/gsea-cli.sh}"
+GMT_DIR="${GMT_DIR:-/path/to/default/gmt_dir}"
+REPORT_DIR="${REPORT_DIR:-/path/to/default/report_dir}"
+
+for full_gmt_path in "$GMT_DIR"/*.gmt; do
+    gmt_file=$(basename "$full_gmt_path")
+    
+    report_subdir="$REPORT_DIR/${gmt_file%.gmt}"
+    mkdir -p "$report_subdir"
+
+    for RNK_FILE in *.rnk; do
+        # Estrai il nome base del file .rnk senza estensione
+        BASENAME=$(basename "$RNK_FILE" .rnk)
+
+        echo "Esecuzione GSEA su $RNK_FILE con GMT $gmt_file"
+        "$GSEA_CLI_PATH" GSEAPreranked -rnk "$RNK_FILE" -gmx "$full_gmt_path" -out "$report_subdir/$BASENAME" -set_max 5000 -set_min 10 -plot_top_x 2000
+    done
+done
